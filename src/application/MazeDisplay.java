@@ -61,33 +61,12 @@ public class MazeDisplay extends Application {
 	/* 
 	 * Logic of the program
 	 */
-	// The search algorithms
-	private Greedy greedy;				
-	private BFS bfs;
-	private DFS dfs;
-	private RandomWalk rand;
-	private Magic magic;
-	private String search = "";		// This string tells which algorithm is currently chosen.  Anything other than 
-	// the implemented search class names will result in no search happening.
-
-	// Where to start and stop the search
-	private Point start;
-	private Point goal;
-
-	// The maze to search
-	private Maze maze;
-
-
+	
+	MazeController controller;
+	
 	// Start of JavaFX Application
 	public void start(Stage stage) {
-		// Initializing logic state
-		int numRows = NUM_ROWS;
-		int numColumns = NUM_COLUMNS;
-		start = new Point(1,1);
-		goal = new Point(numRows-2, numColumns-2);
-		maze = new Maze(numRows, numColumns);
-
-		
+		controller = new MazeController(NUM_ROWS, NUM_COLUMNS, this);
 		// Initializing the gui
 		myScene = setupScene();
 		stage.setScene(myScene);
@@ -129,7 +108,7 @@ public class MazeDisplay extends Application {
 
 		Button newMazeButton = new Button("New Maze");
 		newMazeButton.setOnAction(value ->  {
-			newMaze();
+			controller.newMaze();
 		});
 		controls.getChildren().add(newMazeButton);
 
@@ -141,7 +120,7 @@ public class MazeDisplay extends Application {
 
 		Button stepButton = new Button("Step");
 		stepButton.setOnAction(value ->  {
-			this.doOneStep(MILLISECOND_DELAY);
+			controller.doOneStep(MILLISECOND_DELAY);
 		});
 		controls.getChildren().add(stepButton);
 		return controls;
@@ -154,31 +133,31 @@ public class MazeDisplay extends Application {
 
 		Button dfsButton = new Button("Depth-First Search");
 		dfsButton.setOnAction(value ->  {
-			startSearch("DFS");
+			controller.startSearch("DFS");
 		});
 		searches.getChildren().add(dfsButton);
 
 		Button bfsButton = new Button("Breadth-First Search");
 		bfsButton.setOnAction(value ->  {
-			startSearch("BFS");
+			controller.startSearch("BFS");
 		});
 		searches.getChildren().add(bfsButton);
 
 		Button greedyButton = new Button("Greedy");
 		greedyButton.setOnAction(value ->  {
-			startSearch("Greedy");
+			controller.startSearch("Greedy");
 		});
 		searches.getChildren().add(greedyButton);
 
 		Button randButton = new Button("Random Walk");
 		randButton.setOnAction(value ->  {
-			startSearch("RandomWalk");
+			controller.startSearch("RandomWalk");
 		});
 		searches.getChildren().add(randButton);
 
 		Button magicButton = new Button("Magic!");
 		magicButton.setOnAction(value ->  {
-			startSearch("Magic");
+			controller.startSearch("Magic");
 		});
 		searches.getChildren().add(magicButton);
 		return searches;
@@ -198,22 +177,12 @@ public class MazeDisplay extends Application {
 		for(int i = 0; i< NUM_ROWS; i++){
 			for(int j =0; j < NUM_COLUMNS; j++){
 				Rectangle rect = new Rectangle(j*BLOCK_SIZE, i*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-				rect.setFill(color[getCellState(new Point(i,j))]);
+				rect.setFill(color[controller.getCellState(new Point(i,j))]);
 				mirrorMaze[i][j] = rect;
 				drawing.getChildren().add(rect);
 			}	
 		}
 		return drawing;
-	}
-	
-	/*
-	 * Re-create the maze from scratch.
-	 * When this happens, we should also stop the search.
-	 */
-	public void newMaze() {
-		maze.createMaze(maze.getNumRows(),maze.getNumCols());
-		search = "";
-		redraw();
 	}
 
 	/*
@@ -245,7 +214,7 @@ public class MazeDisplay extends Application {
 	public void redraw(){
 		for(int i = 0; i< mirrorMaze.length; i++){
 			for(int j =0; j < mirrorMaze[i].length; j++){
-				mirrorMaze[i][j].setFill(color[getCellState(new Point(i,j))]);
+				mirrorMaze[i][j].setFill(color[controller.getCellState(new Point(i,j))]);
 			}
 		}
 	}
@@ -255,39 +224,8 @@ public class MazeDisplay extends Application {
 	 */
 	public void step(double elapsedTime){
 		if(!paused) {
-			doOneStep(elapsedTime);
+			controller.doOneStep(elapsedTime);
 		}
-	}
-
-	/*
-	 * Does a step in the search regardless of pause status
-	 */
-	public void doOneStep(double elapsedTime){
-		if(search.equals("DFS")) dfs.step();
-		else if (search.equals("BFS")) bfs.step();
-		else if (search.equals("Greedy")) greedy.step();
-		else if (search.equals("RandomWalk")) rand.step();
-		else if (search.equals("Magic")) magic.step();
-		redraw();
-	}
-	
-	public void startSearch(String searchType) {
-		maze.reColorMaze();
-		search = searchType;
-		
-		// Restart the search.  Since I don't know 
-		// which one, I'll restart all of them.
-		
-		bfs = new BFS(maze, start, goal);	// start in upper left and end in lower right corner
-		dfs = new DFS(maze, start, goal);
-		greedy = new Greedy(maze, start, goal);
-		rand = new RandomWalk(maze, start, goal);
-		magic = new Magic(maze, start, goal);
-	}
-
-
-	public int getCellState(Point position) {
-		return maze.get(position);
 	}
 
 	public static void main(String[] args) {
