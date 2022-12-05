@@ -6,6 +6,7 @@ import searches.Greedy;
 import searches.Magic;
 import searches.RandomWalk;
 import searches.SearchAlgorithm;
+import searches.SearchFactory;
 
 import java.awt.Point;
 
@@ -62,12 +63,16 @@ public class MazeController {
 	}
 	
 	public void startSearch(String searchType) {
+		SearchFactory factory = new SearchFactory();
 		maze.reColorMaze();
-		if(searchType.equals("DFS")) search = new DFS(maze, start, goal);
-		else if (searchType.equals("BFS")) search = new BFS(maze, start, goal);
-		else if (searchType.equals("Greedy")) search = new Greedy(maze, start, goal);
-		else if (searchType.equals("RandomWalk")) search = new RandomWalk(maze, start, goal);
-		else if (searchType.equals("Magic")) search = new Magic(maze, start, goal);
+		search = factory.makeSearch(searchType, maze, start, goal);
+		
+//		maze.reColorMaze();
+//		if(searchType.equals("DFS")) search = new DFS(maze, start, goal);
+//		else if (searchType.equals("BFS")) search = new BFS(maze, start, goal);
+//		else if (searchType.equals("Greedy")) search = new Greedy(maze, start, goal);
+//		else if (searchType.equals("RandomWalk")) search = new RandomWalk(maze, start, goal);
+//		else if (searchType.equals("Magic")) search = new Magic(maze, start, goal);
 		
 		// Restart the search.  Since I don't know 
 		// which one, I'll restart all of them.
