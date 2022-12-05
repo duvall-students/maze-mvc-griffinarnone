@@ -5,6 +5,7 @@ import searches.DFS;
 import searches.Greedy;
 import searches.Magic;
 import searches.RandomWalk;
+import searches.SearchAlgorithm;
 
 import java.awt.Point;
 
@@ -37,7 +38,7 @@ public class MazeController {
 	private DFS dfs;
 	private RandomWalk rand;
 	private Magic magic;
-	private String search = "";		// This string tells which algorithm is currently chosen.  Anything other than 
+	private SearchAlgorithm search;	// This string tells which algorithm is currently chosen.  Anything other than 
 									// the implemented search class names will result in no search happening.
 	
 	public MazeDisplay display;
@@ -56,26 +57,26 @@ public class MazeController {
 	 * Does a step in the search regardless of pause status
 	 */
 	public void doOneStep(double elapsedTime){
-		if(search.equals("DFS")) dfs.step();
-		else if (search.equals("BFS")) bfs.step();
-		else if (search.equals("Greedy")) greedy.step();
-		else if (search.equals("RandomWalk")) rand.step();
-		else if (search.equals("Magic")) magic.step();
+		if (search != null) search.step();
 		display.redraw();
 	}
 	
 	public void startSearch(String searchType) {
 		maze.reColorMaze();
-		search = searchType;
+		if(searchType.equals("DFS")) search = new DFS(maze, start, goal);
+		else if (searchType.equals("BFS")) search = new BFS(maze, start, goal);
+		else if (searchType.equals("Greedy")) search = new Greedy(maze, start, goal);
+		else if (searchType.equals("RandomWalk")) search = new RandomWalk(maze, start, goal);
+		else if (searchType.equals("Magic")) search = new Magic(maze, start, goal);
 		
 		// Restart the search.  Since I don't know 
 		// which one, I'll restart all of them.
 		
-		bfs = new BFS(maze, start, goal);	// start in upper left and end in lower right corner
-		dfs = new DFS(maze, start, goal);
-		greedy = new Greedy(maze, start, goal);
-		rand = new RandomWalk(maze, start, goal);
-		magic = new Magic(maze, start, goal);
+//		bfs = new BFS(maze, start, goal);	// start in upper left and end in lower right corner
+//		dfs = new DFS(maze, start, goal);
+//		greedy = new Greedy(maze, start, goal);
+//		rand = new RandomWalk(maze, start, goal);
+//		magic = new Magic(maze, start, goal);
 	}
 
 	public int getCellState(Point position) {
@@ -88,7 +89,7 @@ public class MazeController {
 	 */
 	public void newMaze() {
 		maze.createMaze(maze.getNumRows(),maze.getNumCols());
-		search = "";
+		search = null;
 		display.redraw();
 	}
 }
